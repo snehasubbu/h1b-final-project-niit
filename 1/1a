@@ -1,0 +1,75 @@
+
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+
+
+public class 	Que{
+
+public static class MyMapper extends Mapper<LongWritable,Text,Text,LongWritable> {
+		LongWritable one = new LongWritable(1);
+		
+		public void map(LongWritable key, Text value, Context context) throws java.io.IOException, InterruptedException 
+		{
+			if(key.get()>0)
+        	{
+                String row = value.toString();
+	        	String [] tokens = row.split("\t");
+	        	String jt=new String(tokens[4]);
+	        	String yr=new String(tokens[7]);
+	        	if(jt !=null && jt.equalsIgnoreCase("DATA ENGINEER") && yr!=null && !yr.equals("NA"))	       	
+	        	{
+	        		Text fin = new Text(yr);
+	        	context.write(fin,one);
+	        	}
+        	}
+		}
+	}
+	
+
+
+
+	
+	public static class MyReducer extends Reducer<Text,LongWritable, Text, LongWritable> 
+	{
+		  
+			 public void reduce(Text key, Iterable<LongWritable> values,Context context) throws IOException,InterruptedException
+			 {
+			  long total=0;
+	          for(LongWritable vk:values)
+	          {
+	          total += vk.get();
+	          }
+	          context.write(key,new LongWritable(total));
+	          
+	         }
+	   }
+	
+    																																																																																					
+	
+  public static void main(String[] args) 
+                  throws IOException, ClassNotFoundException, InterruptedException {
+    
+	Configuration conf = new Configuration();
+	Job job = Job.getInstance(conf);
+    job.setJarByClass(Que.class);
+    job.setMapperClass(MyMapper.class);
+    job.setReducerClass(MyReducer.class);
+    job.setNumReduceTasks(1);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(LongWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+
