@@ -1,0 +1,9 @@
+
+11th query:
+
+sqoop export --connect jdbc:mysql://localhost/sqoop --username root --password 'sneh1234' --table q11 --update-mode allowinsert  --export-dir /Pig/Que10/p* --input-fields-terminated-by '\t';
+
+hadoop fs -mkdir -p /Pig/Que10
+hadoop fs -put /home/hduser/Documents/project/projecth1b/10/p* /Pig/Que10/
+mysql -u root -p'sneh1234' -e 'select * from sqoop.q11';
+
